@@ -1,0 +1,117 @@
+
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: pdf-analyzer-db
+    environment:
+      POSTGRES_DB: pdfanalyzer
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pdf-analyzer-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Core Service
+  core-service:
+    build:
+      context: ./core
+      dockerfile: Dockerfile
+    container_name: pdf-analyzer-core
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-2.0-flash
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "8080:8080"
+    networks:
+      - pdf-analyzer-network
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/analyze/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+  # Data Storage Service
+  data-storage:
+    build:
+      context: ./data-storage
+      dockerfile: Dockerfile
+    container_name: pdf-analyzer-storage
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=pdfanalyzer
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    ports:
+      - "8083:8083"
+    networks:
+      - pdf-analyzer-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/api/v1/storage/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: pdf-analyzer-gateway
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - CORE_SERVICE_URL=http://core-service:8080
+      - STORAGE_SERVICE_URL=http://data-storage:8083
+    ports:
+      - "9090:9090"
+    networks:
+      - pdf-analyzer-network
+    depends_on:
+      - core-service
+      - data-storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Web Dashboard
+  web-dashboard:
+    build:
+      context: ./web-dashboard
+      dockerfile: Dockerfile
+    container_name: pdf-analyzer-web
+    ports:
+      - "80:80"
+    networks:
+      - pdf-analyzer-network
+    depends_on:
+      - api-gateway
+    environment:
+      - VITE_API_URL=http://localhost:9090
+
+networks:
+  pdf-analyzer-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  

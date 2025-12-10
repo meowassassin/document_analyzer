@@ -1,0 +1,62 @@
+server:
+  port: 8080
+  compression:
+    enabled: true
+
+spring:
+  application:
+    name: cell-frequency-parser
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+# Gemini API 설정
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:}  # Gemini API 키
+  model: ${GEMINI_MODEL:gemini-2.0-flash-exp}  # 모델명
+
+# DJL (Deep Java Library) 설정
+djl:
+  embedding:
+    enabled: ${DJL_ENABLED:true}  # DJL 임베딩 활성화 여부
+    model: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2  # 다국어 지원 Sentence-BERT
+    dimension: 384  # 임베딩 벡터 차원
+
+  classifier:
+    enabled: ${DJL_CLASSIFIER_ENABLED:false}  # 문서 타입 분류 모델 활성화
+    model:
+      path: models/document_classifier.pt  # 모델 경로
+    confidence:
+      threshold: 0.7  # 신뢰도 임계값 (70% 이상일 때만 ML 사용)
+
+  score:
+    enabled: ${DJL_SCORE_ENABLED:false}  # 점수 예측 모델 활성화
+    model:
+      path: models/score_predictor.pt  # 모델 경로
+    hybrid:
+      weight: 0.7  # 하이브리드 가중치 (ML 70%, 규칙 30%)
+
+# 서비스 연결 설정
+services:
+  storage:
+    url: http://data-storage:8083
+
+# 로깅 설정
+logging:
+  level:
+    com.pdfanalyzer: DEBUG
+    org.springframework: INFO
+    org.springframework.web: DEBUG
+    org.springframework.http.client: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# 액추에이터 (선택 사항)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

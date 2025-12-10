@@ -1,0 +1,50 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # Core Service 라우팅
+        - id: core-service
+          uri: http://core-service:8080
+          predicates:
+            - Path=/api/v1/analyze/**
+          filters:
+            - StripPrefix=0
+
+        # Data Storage Service 라우팅
+        - id: data-storage
+          uri: http://data-storage:8083
+          predicates:
+            - Path=/api/v1/storage/**
+          filters:
+            - StripPrefix=0
+
+      # CORS 설정
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+
+# 로깅
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway

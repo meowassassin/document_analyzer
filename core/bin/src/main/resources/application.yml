@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: pdf-analyzer-core
+  service:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB

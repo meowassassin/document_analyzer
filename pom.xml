@@ -1,0 +1,104 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Spring Boot Parent 선언 -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.4</version>
+        <relativePath/> <!-- Boot Parent를 전역에서 직접 가져오기 -->
+    </parent>
+
+    <groupId>com.pdfanalyzer</groupId>
+    <artifactId>pdf-analyzer</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>core</module>
+        <module>api-gateway</module>
+        <module>data-storage</module>
+    </modules>
+
+    <properties>
+        <java.version>21</java.version>
+        <pdfbox.version>3.0.1</pdfbox.version>
+        <nd4j.version>1.0.0-M2.1</nd4j.version>
+        <jtransforms.version>3.1</jtransforms.version>
+        <gemini.version>1.0.0</gemini.version>
+        <djl.version>0.28.0</djl.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Apache PDFBox for PDF Processing -->
+            <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>${pdfbox.version}</version>
+            </dependency>
+
+            <!-- ND4J for Numerical Computing -->
+            <dependency>
+                <groupId>org.nd4j</groupId>
+                <artifactId>nd4j-native-platform</artifactId>
+                <version>${nd4j.version}</version>
+            </dependency>
+
+            <!-- JTransforms for FFT Operations -->
+            <dependency>
+                <groupId>com.github.wendykierp</groupId>
+                <artifactId>JTransforms</artifactId>
+                <version>${jtransforms.version}</version>
+            </dependency>
+
+            <!-- Google Gemini AI -->
+            <dependency>
+                <groupId>com.google.genai</groupId>
+                <artifactId>google-genai</artifactId>
+                <version>${gemini.version}</version>
+            </dependency>
+
+            <!-- Deep Java Library (DJL) -->
+            <dependency>
+                <groupId>ai.djl</groupId>
+                <artifactId>api</artifactId>
+                <version>${djl.version}</version>
+            </dependency>
+
+            <!-- DJL PyTorch Engine -->
+            <dependency>
+                <groupId>ai.djl.pytorch</groupId>
+                <artifactId>pytorch-engine</artifactId>
+                <version>${djl.version}</version>
+            </dependency>
+
+            <!-- DJL PyTorch Native Library (CPU only) -->
+            <dependency>
+                <groupId>ai.djl.pytorch</groupId>
+                <artifactId>pytorch-native-cpu</artifactId>
+                <version>2.1.1</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- DJL HuggingFace Tokenizers -->
+            <dependency>
+                <groupId>ai.djl.huggingface</groupId>
+                <artifactId>tokenizers</artifactId>
+                <version>${djl.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
